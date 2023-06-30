@@ -60,16 +60,8 @@ VoronoiOnSphere <- function(
 }
 
 
-#' @importFrom s2 s2_distance s2_point
-#' @noRd
 geodist <- function(A, B, radius, center) {
-  A <- A - center
-  B <- B - center
-  s2_distance(
-    s2_point(A[1L], A[2L], A[3L]),
-    s2_point(B[1L], B[2L], B[3L]),
-    radius = radius
-  )
+  radius * acos(sum((A-center)*(B-center)) / (radius*radius))
 }
 
 #' @importFrom grDevices colorRamp rgb
@@ -202,16 +194,18 @@ plotVoronoiOnSphere <- function(
       colors <- rep(colors, length(vor))
     }
   } else if(all(is.na(colors)) || is.null(colors)) {
-    colors <- rep(NA, length(vor))
+    colors <- NULL
   } else if(!isStringVector(colors)) {
     stop("Invalid `colors` argument.")
   }
   for(i in seq_along(vor)) {
     vor_i <- vor[[i]]
-    plotVoronoiCell(
-      vor_i[["site"]], vor_i[["cell"]], vor_i[["mesh"]],
-      radius, center, palette, bias, colors[i], ...
-    )
+    if(!is.null(colors)) {
+      plotVoronoiCell(
+        vor_i[["site"]], vor_i[["cell"]], vor_i[["mesh"]],
+        radius, center, palette, bias, colors[i], ...
+      )
+    }
     if(edges) {
       plotVoronoiEdges(vor_i[["cell"]], radius, center, ecolor, lwd)
     }
